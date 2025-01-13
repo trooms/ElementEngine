@@ -18,8 +18,8 @@ bool Renderer::Initialize()
 
     ShaderSystem ShaderSystem;
     ShaderSystem.Initialize();
-    SDL_GPUShader *vertexShader = ShaderSystem.LoadShader(GPU_DEVICE, "CornellBox.slang", "vertexMain", SDL_GPU_SHADERSTAGE_VERTEX);
-    SDL_GPUShader *fragmentShader = ShaderSystem.LoadShader(GPU_DEVICE, "CornellBox.slang", "fragmentMain", SDL_GPU_SHADERSTAGE_FRAGMENT);
+    SDL_GPUShader *vertexShader = ShaderSystem.LoadShader(GPU_DEVICE, "Shader.slang", "vertexMain", SDL_GPU_SHADERSTAGE_VERTEX);
+    SDL_GPUShader *fragmentShader = ShaderSystem.LoadShader(GPU_DEVICE, "Shader.slang", "fragmentMain", SDL_GPU_SHADERSTAGE_FRAGMENT);
     if (vertexShader == nullptr || fragmentShader == nullptr)
     {
         SDL_Log("Failed to create shaders!");

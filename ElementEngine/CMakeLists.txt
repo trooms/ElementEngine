@@ -7,38 +7,21 @@ add_executable(ElementEngine
 
 target_include_directories(ElementEngine
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/../Libraries/SDL/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/../Libraries/Slang/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/../Libraries/cgltf
+        ${CMAKE_CURRENT_SOURCE_DIR}/../external/SDL/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/../external/slang/slang
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 )
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_libraries(ElementEngine PRIVATE SDL3::SDL3-shared)
-else()
-    target_link_libraries(ElementEngine PRIVATE SDL3::SDL3-static)
-endif()
-
-set(CMAKE_PREFIX_PATH
-    "${CMAKE_CURRENT_SOURCE_DIR}/../Libraries/Slang"
-    ${CMAKE_PREFIX_PATH}
-)
-find_package(slang REQUIRED)
-
-target_link_libraries(ElementEngine PRIVATE slang::slang)
-
-file(GLOB_RECURSE ASSET_FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/Assets/*"
+# Link SDL and Slang Libraries
+target_link_libraries(ElementEngine
+    PRIVATE
+        SDL3::SDL3-static  # Links SDL dynamically
+        slang              # Links Slang library
 )
 
-add_custom_target(copy_assets ALL
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-            "${CMAKE_CURRENT_BINARY_DIR}/Assets"
+# Copy Assets Folder After Build
+add_custom_command(TARGET ElementEngine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_CURRENT_SOURCE_DIR}/Assets"
-            "${CMAKE_CURRENT_BINARY_DIR}/Assets"
-    DEPENDS ${ASSET_FILES}
+        "${CMAKE_SOURCE_DIR}/ElementEngine/Assets"
+        "$<TARGET_FILE_DIR:ElementEngine>/Assets"
 )
-
-add_dependencies(ElementEngine copy_assets)
-

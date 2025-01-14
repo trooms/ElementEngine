@@ -20,6 +20,10 @@ add_compile_options(
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
 
+# Dependencies
+
+add_subdirectory(external/glm)
+
 # SDL3 Configuration
 set(SDL_SHARED OFF CACHE BOOL "Disable SDL3 as a shared library" FORCE)
 set(SDL_STATIC ON CACHE BOOL "Build SDL3 static library" FORCE)

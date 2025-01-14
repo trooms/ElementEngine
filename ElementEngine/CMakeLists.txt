@@ -9,6 +9,7 @@ target_include_directories(ElementEngine
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/../external/SDL/include
         ${CMAKE_CURRENT_SOURCE_DIR}/../external/slang/slang
+        ${CMAKE_CURRENT_SOURCE_DIR}/../external/glm/glm
         ${CMAKE_CURRENT_SOURCE_DIR}/Public
 )
 
@@ -17,6 +18,7 @@ target_link_libraries(ElementEngine
     PRIVATE
         SDL3::SDL3-static  # Links SDL dynamically
         slang              # Links Slang library
+        glm                # Links GLM library
 )
 
 # Copy Assets Folder After Build

@@ -119,42 +119,17 @@ SDL_GPUShader *ShaderSystem::LoadShader(SDL_GPUDevice *device,
         return NULL;
     }
 
-    Uint32 samplerCount = 0;
+    /*Uint32 samplerCount = 0;
     Uint32 storageBufferCount = 0;
     Uint32 storageTextureCount = 0;
     Uint32 uniformBufferCount = 0;
     slang::ProgramLayout *programLayout = linkedProgram->getLayout(targetIndex, SlangDiagnostics.writeRef());
-    Uint32 parameterCount = programLayout->getParameterCount();
-    for (Uint32 i = 0; i < parameterCount; i++)
+    slang::VariableLayoutReflection *globalScope = programLayout->getGlobalParamsVarLayout();
+    slang::TypeLayoutReflection *globalTypeLayout = globalScope->getTypeLayout();
+    if (!globalTypeLayout)
     {
-        slang::VariableLayoutReflection *parameter = programLayout->getParameterByIndex(i);
-
-        auto tl = parameter->getType();
-        slang::TypeReflection::Kind kind = tl->getKind();
-        if (kind == slang::TypeReflection::Kind::SamplerState)
-        {
-            samplerCount++;
-            continue;
-        }
-
-        if (kind == slang::TypeReflection::Kind::ShaderStorageBuffer)
-        {
-            storageBufferCount++;
-            continue;
-        }
-
-        if (kind == slang::TypeReflection::Kind::Resource)
-        {
-            storageTextureCount++;
-            continue;
-        }
-
-        if (kind == slang::TypeReflection::Kind::ConstantBuffer)
-        {
-            uniformBufferCount++;
-            continue;
-        }
-    }
+        SDL_Log("No uniforms");
+    }*/
 
     SDL_GPUShaderCreateInfo shaderInfo = {
         .code = code,
@@ -162,10 +137,10 @@ SDL_GPUShader *ShaderSystem::LoadShader(SDL_GPUDevice *device,
         .entrypoint = entryPoint,
         .format = SDLFormat,
         .stage = shaderStage,
-        .num_samplers = samplerCount,
-        .num_uniform_buffers = uniformBufferCount,
-        .num_storage_buffers = storageBufferCount,
-        .num_storage_textures = storageTextureCount};
+        .num_samplers = 0,
+        .num_uniform_buffers = 1, // todo
+        .num_storage_buffers = 0,
+        .num_storage_textures = 0};
     SDL_GPUShader *shader = SDL_CreateGPUShader(device, &shaderInfo);
 
     if (shader == NULL)

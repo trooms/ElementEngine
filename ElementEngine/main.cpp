@@ -1,4 +1,25 @@
-#include <Client.h>
+#include <Engine.h>
+
+int main(int argc, char *argv[])
+{
+    Engine *ElementEngine;
+    bool initialized{false};
+
+    ElementEngine = new Engine;
+    initialized = ElementEngine->Initialize();
+    if (initialized)
+    {
+        ElementEngine->Run();
+    }
+
+    ElementEngine->Shutdown();
+    delete ElementEngine;
+    ElementEngine = nullptr;
+
+    return initialized;
+}
+
+/*#include <Client.h>
 
 int main(int argc, char *argv[])
 {
@@ -19,3 +40,4 @@ int main(int argc, char *argv[])
     ClientApp.Shutdown();
     return exitCode;
 }
+*/

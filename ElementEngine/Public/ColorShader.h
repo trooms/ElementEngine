@@ -1,0 +1,40 @@
+#pragma once
+
+#include <SDL3/SDL_gpu.h>
+#include <mat4x4.hpp>
+#include <vec4.hpp>
+
+class ColorShader
+{
+private:
+    struct MatrixBuffer
+    {
+        glm::mat4x4 world;
+        glm::mat4x4 view;
+        glm::mat4x4 projection;
+    };
+
+    struct VertexInput
+    {
+        glm::vec3 position;
+        glm::vec4 color;
+    };
+
+public:
+    void Initialize(SDL_GPUDevice *);
+
+    void SetShaderUniforms(SDL_GPUCommandBuffer *, glm::mat4x4, glm::mat4x4, glm::mat4x4);
+    void ReleaseShaders(SDL_GPUDevice *device);
+
+    inline SDL_GPUShader *GetVertexShader() { return mVertexShader; }
+    inline SDL_GPUShader *GetFragmentShader() { return mFragmentShader; }
+    inline SDL_GPUVertexInputState GetVertexInputState() { return mVertexInputState; }
+
+private:
+    SDL_GPUShader *mVertexShader;
+    SDL_GPUShader *mFragmentShader;
+
+    SDL_GPUVertexInputState mVertexInputState;
+    SDL_GPUVertexAttribute mVertexAttributes[2];
+    SDL_GPUVertexBufferDescription mVertexBufferDescriptions[1];
+};

@@ -20,7 +20,7 @@ RenderContext::~RenderContext()
 {
 }
 
-bool RenderContext::Initialize(int screenWidth, int screenHeight, SDL_Window *window)
+bool RenderContext::Initialize(int screenWidth, int screenHeight, SDL_Window *window, ColorShader *shader)
 {
     if (mDevice = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_MSL, true, nullptr); mDevice == nullptr)
     {
@@ -35,9 +35,7 @@ bool RenderContext::Initialize(int screenWidth, int screenHeight, SDL_Window *wi
     }
     mWindow = window;
 
-    // Shaders
-    mColorShader = new ColorShader;
-    mColorShader->Initialize(mDevice);
+    shader->Initialize(mDevice);
 
     // Depth stencil description
     SDL_GPUDepthStencilState depthStencilState = {};
@@ -93,9 +91,9 @@ bool RenderContext::Initialize(int screenWidth, int screenHeight, SDL_Window *wi
     pipelineInfo.rasterizer_state = rasterState;
     pipelineInfo.target_info = pipelineTargetInfo;
     pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
-    pipelineInfo.vertex_input_state = mColorShader->GetVertexInputState();
-    pipelineInfo.vertex_shader = mColorShader->GetVertexShader();
-    pipelineInfo.fragment_shader = mColorShader->GetFragmentShader();
+    pipelineInfo.vertex_input_state = shader->GetVertexInputState();
+    pipelineInfo.vertex_shader = shader->GetVertexShader();
+    pipelineInfo.fragment_shader = shader->GetFragmentShader();
     // pipelineInfo.multisample_state
 
     mPipeline = SDL_CreateGPUGraphicsPipeline(mDevice, &pipelineInfo);
@@ -122,11 +120,6 @@ bool RenderContext::Initialize(int screenWidth, int screenHeight, SDL_Window *wi
         return false;
     }
 
-    mModel = new Model;
-    mModel->Initialize(mDevice);
-
-    mCamera = new Camera;
-    mCamera->SetPosition(0.0f, 0.0f, -5.0f);
     return true;
 }
 
@@ -140,62 +133,42 @@ void RenderContext::Shutdown()
     {
         SDL_ReleaseGPUTexture(mDevice, mDepthBuffer);
     }
-    if (mColorShader)
-    {
-        delete mColorShader;
-        mColorShader = nullptr;
-    }
-    if (mCamera)
-    {
-        delete mCamera;
-        mCamera = nullptr;
-    }
 }
 
-void RenderContext::BeginScene(float, float, float, float)
+void RenderContext::InitScene(SceneResources &resources)
 {
-}
-
-void RenderContext::EndScene()
-{
-    SDL_GPUCommandBuffer *cmdbuf = SDL_AcquireGPUCommandBuffer(mDevice);
-    if (!cmdbuf)
+    resources.cmdbuf = SDL_AcquireGPUCommandBuffer(mDevice);
+    if (!resources.cmdbuf)
     {
         SDL_Log("AcquireGPUCommandBuffer failed: %s", SDL_GetError());
     }
 
-    SDL_GPUTexture *swapchainTexture;
-    if (!SDL_WaitAndAcquireGPUSwapchainTexture(cmdbuf, mWindow, &swapchainTexture, NULL, NULL))
+    if (!SDL_WaitAndAcquireGPUSwapchainTexture(resources.cmdbuf, mWindow, &resources.swapchainTexture, NULL, NULL))
     {
         SDL_Log("WaitAndAcquireGPUSwapchainTexture failed: %s", SDL_GetError());
     }
 
-    if (!swapchainTexture)
+    if (!resources.swapchainTexture)
     {
         return;
     }
+}
 
+void RenderContext::BeginScene(SceneResources &resources)
+{
     SDL_GPUColorTargetInfo colorTargetInfo = {
-        .texture = swapchainTexture};
+        .texture = resources.swapchainTexture};
     SDL_GPUDepthStencilTargetInfo depthStencilTargetInfo = {};
     GetBackBufferRenderTargetInfo(colorTargetInfo, depthStencilTargetInfo);
 
-    mCamera->Render();
+    resources.renderPass = SDL_BeginGPURenderPass(resources.cmdbuf, &colorTargetInfo, 1, NULL); //&depthStencilTargetInfo);
+    SDL_BindGPUGraphicsPipeline(resources.renderPass, mPipeline);
+}
 
-    glm::mat4x4 worldMatrix, viewMatrix, projectionMatrix;
-    worldMatrix = mWorldMatrix;
-    mCamera->GetViewMatrix(viewMatrix);
-    projectionMatrix = mProjectionMatrix;
-
-    mColorShader->SetShaderUniforms(cmdbuf, worldMatrix, viewMatrix, projectionMatrix);
-
-    SDL_GPURenderPass *renderPass = SDL_BeginGPURenderPass(cmdbuf, &colorTargetInfo, 1, NULL); //&depthStencilTargetInfo);
-    SDL_BindGPUGraphicsPipeline(renderPass, mPipeline);
-
-    mModel->Render(renderPass);
-
-    SDL_EndGPURenderPass(renderPass);
-    SDL_SubmitGPUCommandBuffer(cmdbuf);
+void RenderContext::EndScene(SceneResources &resources)
+{
+    SDL_EndGPURenderPass(resources.renderPass);
+    SDL_SubmitGPUCommandBuffer(resources.cmdbuf);
 }
 
 SDL_GPUDevice *RenderContext::GetDevice()

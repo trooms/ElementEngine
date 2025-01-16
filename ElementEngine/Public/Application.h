@@ -15,4 +15,7 @@ private:
     bool Render();
 
     class RenderContext *mRenderContext;
+    class Camera *mCamera;
+    class Model *mModel;
+    class ColorShader *mColorShader;
 };

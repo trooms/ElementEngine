@@ -1,9 +1,16 @@
 #include <Application.h>
 #include <RenderContext.h>
+#include <Camera.h>
+#include <Model.h>
+#include <ColorShader.h>
+#include <SDL3/SDL_log.h>
 
 Application::Application()
 {
     mRenderContext = nullptr;
+    mCamera = nullptr;
+    mModel = nullptr;
+    mColorShader = nullptr;
 }
 
 Application::Application(const Application &)
@@ -16,16 +23,49 @@ Application::~Application()
 
 bool Application::Initialize(int screenWidth, int screenHeight, SDL_Window *window)
 {
-    bool result{false};
-
     mRenderContext = new RenderContext;
+    mColorShader = new ColorShader;
+    if (!mRenderContext->Initialize(screenWidth, screenHeight, window, mColorShader))
+    {
+        SDL_Log("Could not initialize render context");
+        return false;
+    }
 
-    result = mRenderContext->Initialize(screenWidth, screenHeight, window);
-    return result;
+    mCamera = new Camera;
+    mCamera->SetPosition(0.0f, 0.0f, -5.0f);
+
+    mModel = new Model;
+    if (!mModel->Initialize(mRenderContext->GetDevice()))
+    {
+        SDL_Log("Could not initialize model");
+        return false;
+    }
+
+    return true;
 }
 
 void Application::Shutdown()
 {
+    if (mCamera)
+    {
+        delete mCamera;
+        mCamera = nullptr;
+    }
+
+    if (mColorShader)
+    {
+        mColorShader->Shutdown();
+        delete mColorShader;
+        mColorShader = nullptr;
+    }
+
+    if (mModel)
+    {
+        mModel->Shutdown(mRenderContext->GetDevice());
+        delete mModel;
+        mModel = nullptr;
+    }
+
     if (mRenderContext)
     {
         mRenderContext->Shutdown();
@@ -43,8 +83,20 @@ bool Application::Frame()
 
 bool Application::Render()
 {
-    // mRenderContext->BeginScene(0.5f, 0.5f, 0.5f, 1.0f);
-    mRenderContext->EndScene();
+    mCamera->Render();
+
+    glm::mat4x4 worldMatrix, viewMatrix, projectionMatrix;
+    mRenderContext->GetWorldMatrix(worldMatrix);
+    mCamera->GetViewMatrix(viewMatrix);
+    mRenderContext->GetProjectionMatrix(projectionMatrix);
+
+    RenderContext::SceneResources sceneResources;
+
+    mRenderContext->InitScene(sceneResources);
+    mColorShader->SetShaderUniforms(sceneResources.cmdbuf, worldMatrix, viewMatrix, projectionMatrix);
+    mRenderContext->BeginScene(sceneResources);
+    mModel->Render(sceneResources.renderPass);
+    mRenderContext->EndScene(sceneResources);
 
     return true;
 }

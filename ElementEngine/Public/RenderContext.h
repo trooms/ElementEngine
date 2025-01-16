@@ -5,6 +5,13 @@
 class RenderContext
 {
 public:
+    struct SceneResources
+    {
+        SDL_GPUCommandBuffer *cmdbuf = nullptr;
+        SDL_GPUTexture *swapchainTexture = nullptr;
+        SDL_GPURenderPass *renderPass = nullptr;
+    };
+
     static constexpr float SCREEN_DEPTH = 1000.0f;
     static constexpr float SCREEN_NEAR = 0.3f;
 
@@ -12,12 +19,13 @@ public:
     RenderContext(const RenderContext &);
     ~RenderContext();
 
-    bool Initialize(int, int, struct SDL_Window *);
+    bool Initialize(int, int, struct SDL_Window *, class ColorShader *);
 
     void Shutdown();
 
-    void BeginScene(float, float, float, float);
-    void EndScene();
+    void InitScene(SceneResources &);
+    void BeginScene(SceneResources &);
+    void EndScene(SceneResources &);
 
     SDL_GPUDevice *GetDevice();
 
@@ -34,12 +42,7 @@ private:
     SDL_GPUTexture *mColorBuffer;
     SDL_GPUTexture *mDepthBuffer;
 
-    class ColorShader *mColorShader;
-
     glm::mat4x4 mProjectionMatrix;
     glm::mat4x4 mOrthoMatrix;
     glm::mat4x4 mWorldMatrix;
-
-    class Model *mModel;
-    class Camera *mCamera;
 };

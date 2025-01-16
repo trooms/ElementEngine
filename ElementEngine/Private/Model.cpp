@@ -50,13 +50,13 @@ bool Model::InitializeBuffers(SDL_GPUDevice *device)
 
     // Load the vertex array with data
     vertices[0].position = glm::vec3(-1.0f, -1.0f, 0.0f); // Bottom left.
-    vertices[0].color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[0].color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 
     vertices[1].position = glm::vec3(0.0f, 1.0f, 0.0f); // Top middle.
     vertices[1].color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
     vertices[2].position = glm::vec3(1.0f, -1.0f, 0.0f); // Bottom right.
-    vertices[2].color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    vertices[2].color = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
 
     // Load the index array with data.
     indices[0] = 0; // Bottom left.

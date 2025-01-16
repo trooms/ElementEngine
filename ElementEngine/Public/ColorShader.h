@@ -23,6 +23,8 @@ private:
 public:
     void Initialize(SDL_GPUDevice *);
 
+    void Shutdown();
+
     void SetShaderUniforms(SDL_GPUCommandBuffer *, glm::mat4x4, glm::mat4x4, glm::mat4x4);
     void ReleaseShaders(SDL_GPUDevice *device);
 

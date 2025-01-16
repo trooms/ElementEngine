@@ -47,3 +47,7 @@ void ColorShader::ReleaseShaders(SDL_GPUDevice *device)
     SDL_ReleaseGPUShader(device, mVertexShader);
     SDL_ReleaseGPUShader(device, mFragmentShader);
 }
+
+void ColorShader::Shutdown()
+{
+}

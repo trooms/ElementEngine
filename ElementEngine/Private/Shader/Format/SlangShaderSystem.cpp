@@ -1,20 +1,19 @@
-#include <ShaderSystem.h>
+#include <Shader/Format/SlangShaderSystem.h>
 #include <SDL3/SDL.h>
-#include <slang.h>
-#include <slang-com-ptr.h>
 #include <vector>
 
-Slang::ComPtr<slang::IGlobalSession> globalSession;
-
-void ShaderSystem::Initialize()
+void SlangShaderSystem::Initialize()
 {
-    slang::createGlobalSession(globalSession.writeRef());
+    if (!slangSession)
+    {
+        slang::createGlobalSession(slangSession.writeRef());
+    }
 }
 
-SDL_GPUShader *ShaderSystem::LoadShader(SDL_GPUDevice *device,
-                                        const char *shaderFilename,
-                                        const char *entryPoint,
-                                        SDL_GPUShaderStage shaderStage)
+SDL_GPUShader *SlangShaderSystem::LoadShader(SDL_GPUDevice *device,
+                                             const char *shaderFilename,
+                                             const char *entryPoint,
+                                             SDL_GPUShaderStage shaderStage)
 {
     SDL_GPUShaderFormat BackendFormat = SDL_GetGPUShaderFormats(device);
     SDL_GPUShaderFormat SDLFormat = SDL_GPU_SHADERFORMAT_INVALID;
@@ -24,7 +23,7 @@ SDL_GPUShader *ShaderSystem::LoadShader(SDL_GPUDevice *device,
     {
         slang::TargetDesc targetDesc;
         targetDesc.format = SLANG_SPIRV;
-        targetDesc.profile = globalSession->findProfile("SPIRV_1_6"); // TODO: Make compatible with whatever version installed
+        targetDesc.profile = slangSession->findProfile("SPIRV_1_6"); // TODO: Make compatible with whatever version installed
         targetDescriptions.push_back(targetDesc);
 
         SDLFormat = SDL_GPU_SHADERFORMAT_SPIRV;
@@ -33,7 +32,7 @@ SDL_GPUShader *ShaderSystem::LoadShader(SDL_GPUDevice *device,
     {
         slang::TargetDesc targetDesc;
         targetDesc.format = SLANG_METAL;
-        targetDesc.profile = globalSession->findProfile("METAL_2_4");
+        targetDesc.profile = slangSession->findProfile("METAL_2_4");
         targetDescriptions.push_back(targetDesc);
 
         SDLFormat = SDL_GPU_SHADERFORMAT_MSL;
@@ -42,7 +41,7 @@ SDL_GPUShader *ShaderSystem::LoadShader(SDL_GPUDevice *device,
     {
         slang::TargetDesc targetDesc;
         targetDesc.format = SLANG_DXIL;
-        targetDesc.profile = globalSession->findProfile("DX_6_7");
+        targetDesc.profile = slangSession->findProfile("DX_6_7");
         targetDescriptions.push_back(targetDesc);
 
         SDLFormat = SDL_GPU_SHADERFORMAT_DXIL;
@@ -63,7 +62,7 @@ SDL_GPUShader *ShaderSystem::LoadShader(SDL_GPUDevice *device,
     sessionDesc.searchPathCount = 1;
 
     Slang::ComPtr<slang::ISession> SlangSession;
-    globalSession->createSession(sessionDesc, SlangSession.writeRef());
+    slangSession->createSession(sessionDesc, SlangSession.writeRef());
 
     std::string shaderPath = std::string(SDL_GetBasePath()) + "/Assets/Shaders/" + shaderFilename;
     slang::IModule *SlangShader = SlangSession->loadModule(shaderPath.c_str(), SlangDiagnostics.writeRef());

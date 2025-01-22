@@ -1,12 +1,12 @@
-#include <ColorShader.h>
-#include <ShaderSystem.h>
+#include <Shader/Custom/ColorShader.h>
+#include <Shader/Format/SlangShaderSystem.h>
 
 void ColorShader::Initialize(SDL_GPUDevice *device)
 {
-    ShaderSystem ShaderSystem;
-    ShaderSystem.Initialize();
-    mVertexShader = ShaderSystem.LoadShader(device, "Color.slang", "vertexMain", SDL_GPU_SHADERSTAGE_VERTEX);
-    mFragmentShader = ShaderSystem.LoadShader(device, "Color.slang", "fragmentMain", SDL_GPU_SHADERSTAGE_FRAGMENT);
+    mShaderSystem = new SlangShaderSystem;
+    mShaderSystem->Initialize();
+    mVertexShader = mShaderSystem->LoadShader(device, "Color.slang", "vertexMain", SDL_GPU_SHADERSTAGE_VERTEX);
+    mFragmentShader = mShaderSystem->LoadShader(device, "Color.slang", "fragmentMain", SDL_GPU_SHADERSTAGE_FRAGMENT);
 
     mVertexAttributes[0] = {
         .location = 0,
@@ -50,4 +50,5 @@ void ColorShader::ReleaseShaders(SDL_GPUDevice *device)
 
 void ColorShader::Shutdown()
 {
+    delete mShaderSystem;
 }

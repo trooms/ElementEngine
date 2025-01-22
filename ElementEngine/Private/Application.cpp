@@ -2,7 +2,7 @@
 #include <RenderContext.h>
 #include <Camera.h>
 #include <Model.h>
-#include <ColorShader.h>
+#include <Shader/Custom/ColorShader.h>
 #include <SDL3/SDL_log.h>
 
 Application::Application()

@@ -1,4 +1,4 @@
-file(GLOB PRIVATE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Private/*.cpp")
+file(GLOB_RECURSE PRIVATE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/Private/*.cpp")
 
 add_executable(ElementEngine
     main.cpp

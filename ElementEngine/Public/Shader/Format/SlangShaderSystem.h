@@ -1,8 +1,10 @@
 #pragma once
 
 #include <SDL3/SDL_gpu.h>
+#include <slang.h>
+#include <slang-com-ptr.h>
 
-class ShaderSystem
+class SlangShaderSystem
 {
 public:
     void Initialize();
@@ -11,4 +13,6 @@ public:
                               const char *shaderFilename,
                               const char *entryPoint,
                               SDL_GPUShaderStage shaderStage);
+
+    Slang::ComPtr<slang::IGlobalSession> slangSession;
 };
